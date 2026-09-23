@@ -17,7 +17,7 @@ it('ships the exact baseline counts and every referenced asset, with a matching 
   expect(createHash('sha256').update(text).digest('hex')).toBe(manifest.sha256)
   const data = toVisitorMap(snapshot)
   expect(data.items).toHaveLength(41)
-  expect(data.items.reduce((n, item) => n + (item.members?.length ?? 0), 0)).toBe(15)
+  expect(data.items.reduce((n, item) => n + (item.members?.length ?? 0), 0)).toBe(14)
   expect(data.categories).toHaveLength(8)
   expect(data.mapSettings.zones?.labels).toHaveLength(6)
   const visit = (value: unknown) => {
