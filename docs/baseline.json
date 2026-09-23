@@ -1,0 +1,18 @@
+{
+  "source": "ZooBrooAdmin/public/startup-template.json",
+  "sourceSha256": "10016b02ad6d72bb766c6ee5f714c3ced9cb05e767dfc749a3110e42c6fa3edd",
+  "projectUpdatedAt": "2026-09-20T17:55:27.462Z",
+  "importedAt": "2026-09-23T19:11:24.556Z",
+  "categories": 8,
+  "markers": 41,
+  "members": 15,
+  "zones": 6,
+  "events": 0,
+  "assets": 106,
+  "tileCount": 139,
+  "mapDimensions": [
+    5016,
+    5016
+  ],
+  "sha256": "109c946ec2a876579305a31954e8d2a4ef17062900e99135d3a6d853b29463ca"
+}

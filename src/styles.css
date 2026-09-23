@@ -1,0 +1,127 @@
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; }
+html { font-family: 'Manrope Variable', system-ui, sans-serif; color: #18201c; background: #e7ebde; }
+body { overscroll-behavior: none; }
+/* Allow native list scrolling, but reserve pinch zoom for the map. Apply to
+   scroll containers too: touch-action is evaluated up to the nearest scroller.
+   Low specificity preserves the map's none and galleries/categories' pan-x/y. */
+:where(html, body, #root, #root *) { touch-action: pan-x pan-y; }
+button, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--map-accent, #2f7d59); outline-offset: 3px; }
+.app-map { width: 100%; height: 100%; height: 100dvh; overflow: hidden; }
+.loading-screen { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+.loading-mark { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 24px; background: #2f7d59; color: white; }
+.loading-screen h1 { font-size: 28px; margin: 16px 0 0; letter-spacing: -.05em; }
+.loading-screen p { font-size: 14px; color: #526052; line-height: 1.7; }
+.loading-screen button { display: flex; align-items: center; gap: 8px; border: 0; border-radius: 12px; padding: 13px 18px; background: #2f7d59; color: white; cursor: pointer; }
+.loading-progress { width: 100px; height: 3px; background: #a5b69c; overflow: hidden; border-radius: 3px; margin-top: 12px; }
+.loading-progress::after { content: ''; display: block; width: 50%; height: 100%; background: #2f7d59; animation: load 1.2s ease-in-out infinite alternate; }
+@keyframes load { to { transform: translateX(100%); } }
+/* The simulator's visitor UI fills the real viewport, without the simulated phone chassis. */
+.map-canvas.visitor-map { min-height: 0; background-image: none; }
+.map-canvas.visitor-map .map-canvas__viewport-shell { inset: 0; width: 100%; height: 100%; padding: 0; aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; transform: none; background: none; }
+.map-canvas.visitor-map .map-canvas__viewport-shell::before,
+.map-canvas.visitor-map .map-canvas__viewport-shell::after { display: none; }
+.map-canvas.visitor-map .map-canvas__leaflet { inset: 0; width: 100%; height: 100%; border-radius: 0; touch-action: none; }
+.visitor-map .map-client-search { top: max(18px, env(safe-area-inset-top)); left: max(18px, env(safe-area-inset-left)); right: max(18px, env(safe-area-inset-right)); }
+.visitor-map .map-client-search__input-slot {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+.visitor-map .map-client-search__field input {
+  /* iOS focuses a 16px input without auto-zoom. Render at the chosen 14px
+     appearance, expanding its layout width to keep the same usable space. */
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: calc(100% / .875);
+  height: 40px;
+  font-size: 16px;
+  transform: translateY(-50%) scale(.875);
+  transform-origin: left center;
+}
+.visitor-map .map-client-search__field,
+.visitor-map .map-client-preview__quick,
+.visitor-map .map-client-events__toggle,
+.visitor-map .map-client-location__toggle { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.visitor-map .map-client-events__toggle,
+.visitor-map .map-client-location__toggle { width: 57.6px; height: 57.6px; bottom: max(30px, calc(env(safe-area-inset-bottom) + 12px)); transition: transform 180ms ease, color 140ms ease, background-color 140ms ease; }
+.visitor-map .map-client-events__toggle > svg,
+.visitor-map .map-client-location__toggle > svg { width: 25.2px; height: 25.2px; }
+.visitor-map .map-client-categories { gap: 7.2px; padding: 0 1.2px 6px; }
+.visitor-map .map-client-categories > button {
+  height: 36px;
+  max-width: 139.2px;
+  gap: 6px;
+  padding: 0 10.8px;
+  border-width: 1.2px;
+  font-size: 11.4px;
+}
+.visitor-map .map-client-categories__icon { width: 18px; height: 18px; }
+/* Location is a momentary action; mobile browsers can retain :hover after a tap. */
+.visitor-map .map-client-location__toggle:hover {
+  color: var(--map-accent-ink);
+  background: rgba(255, 255, 252, .95);
+  transform: none;
+}
+.visitor-map .map-client-location__toggle:active {
+  color: var(--map-accent-on);
+  background: var(--map-accent);
+}
+.visitor-position { background: none; border: none; pointer-events: none; }
+.visitor-position__arrow { display: block; width: 40px; height: 48px; transform-origin: center; transition: transform 120ms linear; }
+.visitor-position__arrow svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 3px #173c4a55); }
+.visitor-position__arrow path { fill: #278bea; stroke: #fff; stroke-width: 3; stroke-linejoin: round; }
+.visitor-compass-notice { position: absolute; z-index: 1100; bottom: max(100px, calc(env(safe-area-inset-bottom) + 82px)); left: 50%; transform: translateX(-50%); max-width: calc(100% - 36px); width: max-content; padding: 9px 14px; border-radius: 12px; background: #fffffc; color: #34423b; box-shadow: 0 4px 18px #172c2026; font-size: 12px; text-align: center; pointer-events: none; }
+.visitor-map .map-client-events__toggle.is-raised,
+.visitor-map .map-client-location__toggle.is-raised { bottom: max(30px, calc(env(safe-area-inset-bottom) + 12px)); transform: translateY(-143px); }
+.visitor-map .map-client-preview__quick,
+.visitor-map .map-client-group { bottom: max(29px, calc(env(safe-area-inset-bottom) + 11px)); animation: card-in 220ms cubic-bezier(.22,.72,.24,1); }
+.visitor-map .map-client-preview__sheet,
+.visitor-map .map-client-events__sheet { animation: sheet-in 280ms cubic-bezier(.22,.72,.24,1); }
+.visitor-map .map-client-preview__overlay,
+.visitor-map .map-client-events__overlay { animation: overlay-in 180ms ease; }
+@keyframes card-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+.visitor-map .map-client-preview__scroll { overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom); }
+.visitor-map .map-client-preview__sheet-close { top: max(15px, env(safe-area-inset-top)); }
+/* The visitor page has no simulated phone notch above the events header. */
+.visitor-map .map-client-events__header {
+  min-height: 0;
+  padding: max(15px, env(safe-area-inset-top)) 54px 14px 13px;
+}
+.visitor-map .map-client-events__header > button {
+  top: max(15px, env(safe-area-inset-top));
+  right: 15px;
+}
+.visitor-map .map-client-events__header > button::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
+}
+.visitor-zoom { position: absolute; z-index: 610; right: max(22px, env(safe-area-inset-right)); top: 130px; display: flex; flex-direction: column; gap: 2px; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px #172c2026; }
+.visitor-zoom button { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; background: #fffffc; color: var(--map-accent-ink); cursor: pointer; }
+@media (pointer: coarse) { .visitor-zoom { display: none; } }
+@media (min-width: 700px) {
+ .visitor-map .map-client-search { max-width: 440px; }
+ .visitor-map .map-client-preview__quick, .visitor-map .map-client-group { max-width: 400px; }
+ .visitor-map .map-client-preview__sheet, .visitor-map .map-client-events__sheet { max-width: 480px; margin: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+ *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+.map-zone-anchor { background: none; border: 0; }
+.map-zone-label { display: block; position: absolute; width: max-content; box-sizing: border-box; transform: translate(-50%, -50%); text-align: center; line-height: 1.15; overflow-wrap: anywhere; white-space: normal; }
+.visitor-map .map-client-preview__overlay, .visitor-map .map-client-events__overlay { inset: 0; border-radius: 0; }
+.visitor-map .map-client-preview__sheet, .visitor-map .map-client-events__sheet { border-radius: 0; }
+.visitor-map .map-client-preview__sheet-close::after, .visitor-map .map-client-preview__close::after { content: ''; position: absolute; inset: -8px; }
+/* Keep the visual cross unchanged; give fingers a 55 × 55 px hit area. */
+.visitor-map .map-client-preview__sheet-close::after { inset: -14px; }
+@media (min-width: 700px) {
+ .visitor-map .map-client-preview__overlay, .visitor-map .map-client-events__overlay { background: #20352733; padding: 20px; }
+ .visitor-map .map-client-preview__sheet, .visitor-map .map-client-events__sheet { border-radius: 24px; box-shadow: 0 20px 80px #12211633; }
+}
