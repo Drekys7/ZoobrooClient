@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { MapCategory, MapItem } from '../domain/models'
 import { useMouseDragScroll } from '../hooks/useMouseDragScroll'
 import { CategoryIcon } from './CategoryIcon'
@@ -16,10 +16,35 @@ export function PhoneGroupPreview({ entries, category, getImageUrl, onChoose, on
   const listRef = useRef<HTMLDivElement>(null)
   const dragScroll = useMouseDragScroll('x')
   const groupId = entries[0]?.id
+  useLayoutEffect(() => {
+    if (listRef.current) listRef.current.scrollLeft = 0
+  }, [groupId])
+
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    const updateEdges = () => {
+      const maxScroll = Math.max(0, list.scrollWidth - list.clientWidth)
+      const offset = Math.max(0, Math.min(maxScroll, list.scrollLeft))
+      const opacity = (hidden: number) => entries.length > 3 && hidden > 1 ? Math.min(1, hidden / 69.75) : 0
+      // The gradient stays three quarters of a card wide (93 * .75). Only its opacity changes
+      // near either scroll boundary, so it never shrinks into a narrow stripe.
+      list.style.setProperty('--group-fade-start-opacity', String(opacity(offset)))
+      list.style.setProperty('--group-fade-end-opacity', String(opacity(maxScroll - offset)))
+    }
+    updateEdges()
+    list.addEventListener('scroll', updateEdges, { passive: true })
+    const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateEdges)
+    resize?.observe(list)
+    return () => {
+      list.removeEventListener('scroll', updateEdges)
+      resize?.disconnect()
+    }
+  }, [groupId, entries.length])
+
   useEffect(() => {
     const list = listRef.current
     if (!list) return
-    list.scrollLeft = 0
     const onWheel = (event: WheelEvent) => {
       const maxScroll = list.scrollWidth - list.clientWidth
       if (event.ctrlKey || maxScroll <= 0) return

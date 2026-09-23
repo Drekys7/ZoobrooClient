@@ -381,6 +381,13 @@
 }
 
 .map-client-categories::-webkit-scrollbar { display: none; }
+/* Alpha-mask the whole strip so the actual map shows through at clipped edges.
+   Fixed-width fades disappear through opacity as the first/last chip is revealed. */
+.map-client-categories {
+  --category-edge-fade-width: 16px;
+  -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / calc(1 - var(--category-fade-start-opacity, 0))), #000 var(--category-edge-fade-width), #000 calc(100% - var(--category-edge-fade-width)), rgb(0 0 0 / calc(1 - var(--category-fade-end-opacity, 0))));
+  mask-image: linear-gradient(to right, rgb(0 0 0 / calc(1 - var(--category-fade-start-opacity, 0))), #000 var(--category-edge-fade-width), #000 calc(100% - var(--category-edge-fade-width)), rgb(0 0 0 / calc(1 - var(--category-fade-end-opacity, 0))));
+}
 .map-client-categories > button {
   display: flex;
   flex: 0 0 auto;
@@ -733,6 +740,13 @@
 .map-client-group { position: absolute; z-index: 620; left: 20px; right: 20px; bottom: 29px; height: 132px; padding: 8px; border-radius: 18px; background: rgba(255,255,252,.97); box-shadow: 0 16px 40px #121b1633; }
 .map-client-group__list { display: flex; gap: 7px; height: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
 .map-client-group__list::-webkit-scrollbar { display: none; }
+/* Reveal the white panel through fading photo edges; the mask does not cover
+   the close button or intercept clicks, wheel, or touch scrolling. */
+.map-client-group__list.has-more {
+  --group-edge-fade-width: 69.75px;
+  -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / calc(1 - var(--group-fade-start-opacity, 0))), #000 var(--group-edge-fade-width), #000 calc(100% - var(--group-edge-fade-width)), rgb(0 0 0 / calc(1 - var(--group-fade-end-opacity, 0))));
+  mask-image: linear-gradient(to right, rgb(0 0 0 / calc(1 - var(--group-fade-start-opacity, 0))), #000 var(--group-edge-fade-width), #000 calc(100% - var(--group-edge-fade-width)), rgb(0 0 0 / calc(1 - var(--group-fade-end-opacity, 0))));
+}
 /* Keep a recognisable ~4:5 photo instead of squeezing 3.5 narrow strips into a phone. */
 .map-client-group__list.has-more > .map-client-group__entry { flex-basis: 93px; }
 .map-client-group__entry { position: relative; flex: 0 0 calc((100% - 14px) / 3); min-width: 0; display: grid; place-items: center; overflow: hidden; padding: 0; border: 0; border-radius: 12px; color: #76917d; background: #e8eee5; cursor: pointer; scroll-snap-align: start; }

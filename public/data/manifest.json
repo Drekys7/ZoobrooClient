@@ -3,9 +3,9 @@
   "projectId": "zooweb-main",
   "schemaVersion": 1,
   "version": 1,
-  "publishedAt": "2026-09-20T17:55:27.462Z",
-  "contractUrl": "versions/109c946ec2a876579305/map.json",
-  "sha256": "109c946ec2a876579305a31954e8d2a4ef17062900e99135d3a6d853b29463ca",
+  "publishedAt": "2026-09-23T23:08:05.528Z",
+  "contractUrl": "versions/31bb94b393dbe940d9e8/map.json",
+  "sha256": "31bb94b393dbe940d9e80b614feaa1f647b860ecd4edce885e6c62b8783ab53f",
   "raster": {
     "sourceAssetId": "3d21d264-6909-4d31-bf66-9202f77027fc",
     "previewUrl": "rasters/17a3d269e0ab693e7668/preview.jpg",

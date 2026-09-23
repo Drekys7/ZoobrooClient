@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { MapCategory, MapItem } from '../domain/models'
 import { PhoneGroupPreview } from './PhoneGroupPreview'
 
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 const entries: MapItem[] = Array.from({ length: 5 }, (_, index) => ({
   id: `item-${index}`, title: `Punkt ${index + 1}`, categoryId: 'animals', type: 'animal',
@@ -12,6 +12,56 @@ const entries: MapItem[] = Array.from({ length: 5 }, (_, index) => ({
 }))
 
 describe('group preview scrolling', () => {
+  it('fades only edges with hidden cards and updates when the viewport grows', () => {
+    let resized!: () => void
+    const disconnect = vi.fn()
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: () => void) { resized = callback }
+      observe() {}
+      disconnect = disconnect
+    })
+    const { container, unmount } = render(<PhoneGroupPreview entries={entries} getImageUrl={() => null} onChoose={vi.fn()} onClose={vi.fn()} />)
+    const list = container.querySelector<HTMLDivElement>('.map-client-group__list')!
+    Object.defineProperties(list, { clientWidth: { value: 300, configurable: true }, scrollWidth: { value: 493 } })
+    const edges = () => [Number(list.style.getPropertyValue('--group-fade-start-opacity')), Number(list.style.getPropertyValue('--group-fade-end-opacity'))]
+    resized()
+    expect(edges()).toEqual([0, 1])
+    list.scrollLeft = 80
+    fireEvent.scroll(list)
+    expect(edges()).toEqual([1, 1])
+    list.scrollLeft = 183
+    fireEvent.scroll(list)
+    expect(edges()[0]).toBe(1)
+    expect(edges()[1]).toBeCloseTo(10 / 69.75)
+    list.scrollLeft = 193
+    fireEvent.scroll(list)
+    expect(edges()).toEqual([1, 0])
+    list.scrollLeft = -10 // Safari overscroll must not create a negative mask.
+    fireEvent.scroll(list)
+    expect(edges()).toEqual([0, 1])
+    Object.defineProperty(list, 'clientWidth', { value: 600 })
+    resized()
+    expect(edges()).toEqual([0, 0])
+    unmount()
+    expect(disconnect).toHaveBeenCalledOnce()
+  })
+
+  it('resets fading for a new group and leaves groups of three fully clear', () => {
+    const props = { getImageUrl: () => null, onChoose: vi.fn(), onClose: vi.fn() }
+    const { container, rerender } = render(<PhoneGroupPreview {...props} entries={entries} />)
+    const list = container.querySelector<HTMLDivElement>('.map-client-group__list')!
+    Object.defineProperties(list, { clientWidth: { value: 300 }, scrollWidth: { value: 493 } })
+    list.scrollLeft = 193
+    fireEvent.scroll(list)
+    rerender(<PhoneGroupPreview {...props} entries={entries.slice(1)} />)
+    expect(list.scrollLeft).toBe(0)
+    expect(list.style.getPropertyValue('--group-fade-start-opacity')).toBe('0')
+    expect(list.style.getPropertyValue('--group-fade-end-opacity')).toBe('1')
+    rerender(<PhoneGroupPreview {...props} entries={entries.slice(1, 4)} />)
+    expect(list.style.getPropertyValue('--group-fade-start-opacity')).toBe('0')
+    expect(list.style.getPropertyValue('--group-fade-end-opacity')).toBe('0')
+  })
+
   it.each(['animal', 'restaurant', 'restroom', 'souvenir', 'entrance', 'custom'] as const)('uses the %s category icon and live category color when a photo is missing', (type) => {
     const category: MapCategory = { id: 'category', name: 'Kategorie', type, color: '#226688', visible: true, sortOrder: 0 }
     const props = { entries: entries.slice(0, 2).map((entry) => ({ ...entry, type, iconAssetId: 'own-icon', markerOverrides: { color: '#ffffff' } })),

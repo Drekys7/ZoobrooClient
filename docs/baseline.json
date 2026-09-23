@@ -1,18 +1,18 @@
 {
   "source": "ZooBrooAdmin/public/startup-template.json",
-  "sourceSha256": "10016b02ad6d72bb766c6ee5f714c3ced9cb05e767dfc749a3110e42c6fa3edd",
-  "projectUpdatedAt": "2026-09-20T17:55:27.462Z",
-  "importedAt": "2026-09-23T19:11:24.556Z",
+  "sourceSha256": "ce4d3def86f37e1dd496478ebd0d4d426d02e5bc3257d0ee160c877e278f0c41",
+  "projectUpdatedAt": "2026-09-23T23:08:05.528Z",
+  "importedAt": "2026-09-23T23:08:16.614Z",
   "categories": 8,
   "markers": 41,
-  "members": 15,
+  "members": 14,
   "zones": 6,
   "events": 0,
-  "assets": 106,
+  "assets": 105,
   "tileCount": 139,
   "mapDimensions": [
     5016,
     5016
   ],
-  "sha256": "109c946ec2a876579305a31954e8d2a4ef17062900e99135d3a6d853b29463ca"
+  "sha256": "31bb94b393dbe940d9e80b614feaa1f647b860ecd4edce885e6c62b8783ab53f"
 }

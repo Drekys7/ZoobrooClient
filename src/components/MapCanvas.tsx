@@ -120,7 +120,7 @@ export function quickPreviewWouldCoverPoint(
   point: Pick<L.Point, 'y'>,
   viewport: Pick<L.Point, 'y'>,
 ): boolean {
-  const quickPreviewTop = viewport.y - 29 - 132
+  const quickPreviewTop = viewport.y - 14.5 - 132
   const markerClearance = 36
   return point.y + markerClearance >= quickPreviewTop
 }

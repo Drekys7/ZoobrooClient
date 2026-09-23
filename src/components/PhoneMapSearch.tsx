@@ -1,5 +1,5 @@
 import { Languages, Search, X } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { categoryColorizeIcon, categoryIconContentScale, type MapCategory, type MapItem } from '../domain/models'
 import { groupEntries, itemIconAssetId, itemIconColor } from '../domain/groups'
 import { getCategoryIconUrl } from './CategoryIcon'
@@ -69,6 +69,7 @@ export function PhoneMapSearch({
   const copy = visitorCopy(locale)
   const dragCategories = useMouseDragScroll('x')
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const categoriesRef = useRef<HTMLDivElement | null>(null)
   const [query, setQuery] = useState('')
   const [resultsOpen, setResultsOpen] = useState(false)
   const categoriesById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories])
@@ -76,6 +77,25 @@ export function PhoneMapSearch({
     () => categories.filter((category) => category.visible && items.some((item) => item.visible && item.categoryId === category.id)),
     [categories, items],
   )
+  useLayoutEffect(() => {
+    const strip = categoriesRef.current
+    if (!strip) return
+    const updateEdges = () => {
+      const maxScroll = Math.max(0, strip.scrollWidth - strip.clientWidth)
+      const offset = Math.max(0, Math.min(maxScroll, strip.scrollLeft))
+      const opacity = (hidden: number) => hidden > 1 ? Math.min(1, hidden / 32) : 0
+      strip.style.setProperty('--category-fade-start-opacity', String(opacity(offset)))
+      strip.style.setProperty('--category-fade-end-opacity', String(opacity(maxScroll - offset)))
+    }
+    updateEdges()
+    strip.addEventListener('scroll', updateEdges, { passive: true })
+    const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateEdges)
+    resize?.observe(strip)
+    // Button widths also change when fonts load or category names are translated.
+    for (const child of strip.children) resize?.observe(child)
+    return () => { strip.removeEventListener('scroll', updateEdges); resize?.disconnect() }
+  }, [showCategories, visibleCategories])
+
   const results = useMemo(() => {
     if (!query.trim()) return []
     return items
@@ -203,6 +223,7 @@ export function PhoneMapSearch({
       ) : null}
 
       {showCategories && <div
+        ref={categoriesRef}
         className="map-client-categories"
         {...dragCategories}
         role="group"

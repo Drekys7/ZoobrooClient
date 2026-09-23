@@ -13,9 +13,43 @@ const items: MapItem[] = [
   { id: 'bistro', categoryId: 'food', type: 'restaurant', title: 'Bären-Bistro', position: { x: 0.7, y: 0.8 }, subtitle: '', description: '', iconAssetId: null, imageAssetId: null, colorOverride: null, markerOverrides: null, facts: [], visible: true, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
 ]
 
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 describe('PhoneMapSearch', () => {
+  it('fades only overflowing category edges, with opacity at the ends and resize updates', () => {
+    let resized!: () => void
+    const disconnect = vi.fn()
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: () => void) { resized = callback }
+      observe() {}
+      disconnect = disconnect
+    })
+    const { container, unmount } = render(<PhoneMapSearch items={items} categories={categories} locale="de" hiddenCategoryIds={new Set()}
+      getItemIconUrl={() => '/icon.png'} onToggleCategory={vi.fn()} onChooseItem={vi.fn()} />)
+    const strip = container.querySelector<HTMLDivElement>('.map-client-categories')!
+    Object.defineProperties(strip, { clientWidth: { value: 100, configurable: true }, scrollWidth: { value: 300 } })
+    const edges = () => [Number(strip.style.getPropertyValue('--category-fade-start-opacity')), Number(strip.style.getPropertyValue('--category-fade-end-opacity'))]
+    resized()
+    expect(edges()).toEqual([0, 1])
+    strip.scrollLeft = 50
+    fireEvent.scroll(strip)
+    expect(edges()).toEqual([1, 1])
+    strip.scrollLeft = 184
+    fireEvent.scroll(strip)
+    expect(edges()).toEqual([1, .5])
+    strip.scrollLeft = 200
+    fireEvent.scroll(strip)
+    expect(edges()).toEqual([1, 0])
+    strip.scrollLeft = -10
+    fireEvent.scroll(strip)
+    expect(edges()).toEqual([0, 1])
+    Object.defineProperty(strip, 'clientWidth', { value: 400 })
+    resized()
+    expect(edges()).toEqual([0, 0])
+    unmount()
+    expect(disconnect).toHaveBeenCalledOnce()
+  })
+
   it('drags the category strip without toggling a category and keeps normal clicks', () => {
     const toggle = vi.fn()
     const { container } = render(<PhoneMapSearch items={items} categories={categories} locale="de" hiddenCategoryIds={new Set()}
